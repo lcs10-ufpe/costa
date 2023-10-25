@@ -1,0 +1,6 @@
+// null 1.2.0.RELEASE log opened at 2021-03-20 20:36:57
+! docker exec -it nginx sed -i "s/server 40.85.173.48;/server 40.85.173.48 down;/g;s/server 34.66.194.254 down;/server 34.66.194.254;/g" /etc/nginx/conf.d/default.conf
+! docker exec -it nginx nginx -t
+! docker exec -it nginx nginx -s reload
+// null 1.2.0.RELEASE log opened at 2021-03-20 20:40:56
+! docker exec -it nginx sed -i "s/server 40.85.173.48;/server 40.85.173.48 down;/g;s/server 34.66.194.254 down;/server 34.66.194.254;/g" /etc/nginx/conf.d/default.conf

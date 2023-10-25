@@ -1,0 +1,8 @@
+rootProject.name = 'costa'
+include 'cost-estimation-api'
+include 'planner-api'
+include 'monitor-cloudcost-api'
+include 'executer-api'
+include 'analyze-cloudcost-api'
+include 'budgeting-api'
+

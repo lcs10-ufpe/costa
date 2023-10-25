@@ -1,0 +1,101 @@
+pipeline{
+    agent any
+    
+    parameters {
+        string(name: 'APPROVE', defaultValue: '', description: 'destruir infraestrutura sim ou nao?')
+        string(name: 'COSTESTIMATION', defaultValue: '', description: 'estimar custos sim ou nao?')
+    }
+    
+    options {
+        retry(3)
+    }
+    
+    stages{
+        
+        stage('Git Checkout') {
+            when {
+                expression { "${APPROVE}" == "" }
+            }
+            steps{
+                git credentialsId: '########-####-####-####-############', url: 'https://{access_token_classic}@github.com/lcs10-ufpe/hipster-shop-aws'
+            }
+        }
+        
+        stage('Terraform Init') {
+            when {
+                allOf {
+                    expression { "${APPROVE}" == "" }
+                    
+                    anyOf {
+                        expression { "${COSTESTIMATION}" == "--yes" }
+                        expression { "${COSTESTIMATION}" == "" }
+                    }
+                }
+            }
+            steps{
+                sh label: '', script: 'terraform init'
+            }
+        }
+        
+        stage('Gerar estimativa de custos com infracost') {
+            when {
+                allOf {
+                    expression { "${APPROVE}" == "" }
+                    expression { "${COSTESTIMATION}" == "--yes" }
+                }
+            }
+            steps{
+                sh 'infracost breakdown --show-skipped --path /var/jenkins_home/workspace/hipster-shop-aws'
+            }
+        }
+        
+        stage('Terraform Apply') {
+            when {
+                allOf {
+                    expression { "${APPROVE}" == "" }
+                    expression { "${COSTESTIMATION}" == "" }
+                }
+            }
+            steps{
+                sh '''MY_PUBLIC_IP="$(curl -s ipinfo.io/ip)"
+                    echo "... Meu IP publico $MY_PUBLIC_IP"
+
+                    echo "Starting terraform..."
+                    terraform apply -var "my_public_ip=$MY_PUBLIC_IP/32" --auto-approve'''
+            }
+        }
+        
+        stage('Start Ansible') {
+            when {
+                allOf {
+                    expression { "${APPROVE}" == "" }
+                    expression { "${COSTESTIMATION}" == "" }
+                }
+            }
+            steps{
+                sh '''cd key
+                    chmod 400 demo_key
+                    cd ..
+                    cd ansible
+                    ANSIBLE_HOST_KEY_CHECKING=false ansible-playbook -i ../hosts --private-key ../key/demo_key playbook.yml -v'''
+            }
+        }
+        
+        stage('Terraform Destroy') {
+            when {
+                allOf {
+                    expression { "${APPROVE}" == "--auto-approve" }
+                    expression { "${COSTESTIMATION}" == "" }
+                }
+            }
+            steps{
+                sh '''MY_PUBLIC_IP="$(curl -s ipinfo.io/ip)"
+                    echo "... Meu IP publico $MY_PUBLIC_IP"
+
+                    echo "terraform destroy ${APPROVE}"
+                    terraform destroy -var "my_public_ip=$MY_PUBLIC_IP/32" ${APPROVE}'''
+            }
+        }
+        
+    }
+}

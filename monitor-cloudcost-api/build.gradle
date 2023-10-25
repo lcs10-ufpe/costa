@@ -1,0 +1,72 @@
+buildscript {
+	ext {
+		springBootVersion = '2.0.5.RELEASE'
+	}
+	repositories {
+		mavenCentral()
+	}
+	dependencies {
+		classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
+	}
+}
+
+apply plugin: 'java'
+apply plugin: 'eclipse'
+apply plugin: 'org.springframework.boot'
+apply plugin: 'io.spring.dependency-management'
+
+group = 'br.ufpe.cin.costexplorer'
+version = '0.0.1-SNAPSHOT'
+sourceCompatibility = '1.8'
+
+repositories {
+	mavenCentral()
+}
+
+dependencyManagement {
+	imports {
+		mavenBom 'com.amazonaws:aws-java-sdk-bom:1.11.502'
+		mavenBom 'com.google.cloud:libraries-bom:5.7.0'
+//		mavenBom 'com.microsoft.azure:azure-spring-boot-bom:2.0.5'
+	}
+}
+
+dependencies {
+	compile('org.springframework.boot:spring-boot-starter-actuator')
+	compile('org.springframework.boot:spring-boot-starter-web')
+	runtime('org.springframework.boot:spring-boot-devtools')
+
+	compile('org.springframework.cloud:spring-cloud-starter-openfeign:2.0.4.RELEASE')
+
+	compileOnly('org.projectlombok:lombok:1.18.4')
+	annotationProcessor('org.projectlombok:lombok:1.18.4')
+
+	compile("io.springfox:springfox-swagger-ui:2.9.2")
+	compile("io.springfox:springfox-swagger2:2.9.2")
+
+	compile('org.springframework.boot:spring-boot-starter-data-jpa')
+	runtime('org.postgresql:postgresql')
+
+	testCompile('org.springframework.boot:spring-boot-starter-test')
+
+	// AWS
+	compile('com.amazonaws:aws-java-sdk-costexplorer')
+
+	// Azure
+	compile('com.microsoft.azure:adal4j:1.0.0')
+
+//	compile('com.microsoft.azure:azure:1.22.0')
+
+//	compile('com.microsoft.rest:client-runtime:1.6.0')
+
+
+//	compile('com.microsoft.azure:azure-active-directory-spring-boot-starter')
+
+//	compile('com.microsoft.azure.costmanagement.v2019_11_01:azure-mgmt-costmanagement:1.0.0-beta')
+
+	compile('com.google.api-client:google-api-client')
+//	compile('com.google.cloud:google-cloud-billing:1.0.2')
+	compile('com.google.apis:google-api-services-cloudbilling:v1-rev20200503-1.30.9')
+//	compile('com.google.cloud:google-cloud-billingbudgets:0.2.4')
+	compile('com.google.cloud:google-cloud-bigquery')
+}
